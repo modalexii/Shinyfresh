@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+
+<!--[if lt IE 7 ]> <html class="ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html class="ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
+<!--[if (gt IE 11)|!(IE)]><!--> <html> <!--<![endif]-->
+
+
+<head>
+	<title>File Upload</title>
+	<link href="/static/style/fonts/stylesheet.css" type="text/css" rel="stylesheet">
+	<link href="/static/style/rocketeria.css" type="text/css" rel="stylesheet">
+	<link rel="stylesheet" href="/static/style/alert_banner.css"/ >
+	<style type="text/css">
+		body {{
+			background: none !important;
+		}}
+		input {{
+			font-family: 'Quicksandregular', sans-serif;
+			color: #0f0403;
+		}}
+		#upload, #cancel, #success, #return {{
+			padding: 5px;
+			text-align: center;
+		}}
+		#upload:hover, #cancel:hover, #return:hover {{
+			cursor: pointer;
+			font-weight: bold;
+		}}
+	</style>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script>
+		if (document.documentMode===10){{
+			document.documentElement.className+=' ie10';
+		}}
+		else if (document.documentMode===11){{
+			document.documentElement.className+=' ie11';
+		}}
+		$(document).ready(function(){{
+			$("#upload").on('click', function() {{
+				if ($("input:file").val() == "") {{
+					alert('Please select a file to upload!');
+				}}
+				else {{
+					$("form[name='upload']").submit();
+				}}
+			}});
+			$('#cancel').click(function(){{
+				window.close();
+			}});
+			$('#return').click(function(){{
+				window.location.replace('/modify/upload');
+			}});
+		}});
+	</script>
+</head>
+	<body>
+		<h2>File Upload</h2>
+		<div id="main">
+			{content}
+		</div>
+	</body>
+</html>

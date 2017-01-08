@@ -1,0 +1,51 @@
+		A public link will be provided after upload
+		<br/>
+		<br/>
+		<form name="upload" action="/modify/upload" method="post" enctype="multipart/form-data">
+			<table>
+				<tr>
+					<td class="blue_bg" colspan=2>
+						<input type="file" name="file" id="file"/>&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td colspan=2>
+						<br/>
+						Limit file names to the following characters:
+						<ul>
+							<li>&bull;Uppercase English Letters</li>
+							<li>&bull;Lowercase English Letters</li>
+							<li>&bull;Numbers</li>
+							<li>&bull;Underscore, Hyphen, Plus, Tilde</li>
+						</ul>
+						<br/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="child_bin">GCS Child Bin (advanced):</label>
+					</td>
+					<td>
+						/dres/<input type="text" name="child_bin" value=""/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=2>
+						Child Bins are like folders: if you upload &quot;policy.pdf&quot; and specify &quot;lessons&quot; as the Child Bin, the file will be available at &quot;/dres/lessons/policy.pdf&quot;
+						<br/>
+						<br/>
+					</td>
+				</tr>
+					<td>
+						<div id="upload" class="green_bg">
+							Upload
+						</div>
+					</td>
+					<td>
+						<div id="cancel" class="red_bg white_txt">
+							Cancel
+						</div>
+					</td>
+				</tr>
+			</table>
+		</form>

@@ -1,0 +1,37 @@
+<div id="adminbar" class="adminutility">
+	<div id="admincontent">
+		<div id="currentpageoperations">
+			<span id="currentpagelabel">Current Page: </span>
+			<button id="cancelthis" class="admin_link">
+				Cancel
+			</button>
+			<button id="editthis" class="admin_link">
+				Edit
+			</button>
+			<button id="savethis" class="admin_link">
+				Save
+			</button>
+			<button id="deletethis" class="admin_link">
+				Delete
+			</button>
+		</div> <!-- /currentpageoperations -->
+		<button id="newpage" class="admin_link">
+			New Page 
+		</button>
+		<select id="template_select">
+			<option value="" disabled selected hidden>Choose template</option>
+			<option value="child">Child</option>
+			<option value="index">Index</option>
+			<option value="gallery">Gallery</option>
+			<option value="none">Blank</option>
+		</select>
+		<input id="newpath" type="text" placeholder="/example/mynewpage"></input>
+		<button id="uploadfile" class="admin_link">
+			Upload
+		</button>
+		<button id="logout" class="admin_link">
+			Log Out {nickname}
+		</button>
+	</div> <!-- /admin_content -->
+	<script src="/static/script/admin.js"></script>
+</div> 

@@ -1,0 +1,39 @@
+<div id="header-sub">
+<img class="bg-header-sub" src="/static/image/header-red.png" width="705px" height="82px"/>
+<h1>404 - Not Found</h1>
+</div><!-- /header-sub -->
+<div id="content_sub">
+<p><big>Sorry, that page does not exist</big></p>
+<p>Here are some things that <i>do</i> exist:
+<ul>
+<li><a href="/">The Home Page</a></li>
+<li><a href="/about">The &quot;About Us&quot; Page</a></li>
+<li><a href="https://www.facebook.com/rocketeria" target="_blank">Our Facebook Page</a></li>
+<li><a href="https://www.youtube.com/watch?v=kCpjgl2baLs" target="_blank">The End of the World</a></li>
+</ul>
+<br/><br/>
+<hr/>
+<p>
+Did a link in an advertisement, flyer or email land you here? <br/>Help us out with just one click:
+<br/><br/>
+<!-- not noscript-compat :( -->
+<a href="#" class="btn animate report" style="background-color:#96231f;" onclick="reportDeadLink();">report dead link</a>
+</p>
+</div><!-- /content_sub -->
+<script type="text/javascript">
+function reportDeadLink() {
+	$('a.report').html('<img src="/static/image/wait.gif" style="padding-left:70px;padding-right:70px;"/>');
+	$.post('/sendmail/deadlink', {
+			'badurl' : document.URL
+	})
+	.done(function() {
+		alert('You rock! Click OK to go to the home page.');
+		window.location = '/';
+	})
+	.fail(function(data, textStatus, xhr) {
+		// thank them anyway
+		alert('Thanks! Click OK to go to the home page.');
+		window.location = '/';
+	});
+}
+</script>

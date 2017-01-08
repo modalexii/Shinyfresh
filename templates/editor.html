@@ -1,0 +1,53 @@
+<!--
+<script src="/static/script/ckeditor/ckeditor.js"></script>
+
+<a href="/modify/upload" onclick="window.open(this.href, 'mywin', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;">
+	Upload File
+</a>
+<div id="editable" contenteditable="true">
+	{content}
+</div> 
+<script>
+	CKEDITOR.inline( '' );
+	onclick=function(){SomeJavaScriptCode};
+	// The "instanceCreated" event is fired for every editor instance created.
+	CKEDITOR.on( 'instanceCreated', function( event ) {{
+		var editor = event.editor,
+			element = editor.element;
+
+		// Customize editors for headers and tag list.
+		// These editors don't need features like smileys, templates, iframes etc.
+		if ( element.is( 'h1', 'h2', 'h3' ) || element.getAttribute( 'id' ) == 'taglist' ) {{
+			// Customize the editor configurations on "configLoaded" event,
+			// which is fired after the configuration file loading and
+			// execution. This makes it possible to change the
+			// configurations before the editor initialization takes place.
+			editor.on( 'configLoaded', function() {{
+
+				// Remove unnecessary plugins to make the editor simpler.
+				editor.config.removePlugins = 'colorbutton,find,flash,font,' +
+					'forms,iframe,image,newpage,removeformat,' +
+					'smiley,specialchar,stylescombo,templates';
+
+				// Rearrange the layout of the toolbar.
+				editor.config.toolbarGroups = [
+					{{ name: 'editing',		groups: [ 'basicstyles', 'links' ] }},
+					{{ name: 'undo' }},
+					{{ name: 'clipboard',	groups: [ 'selection', 'clipboard' ] }},
+					{{ name: 'about' }}
+				];
+			}});
+		}}
+	}});
+</script>
+<form method="post" action="/modify">
+	<input type="hidden" name="content" id="content" value="" />
+	<label for="uri" class="writeto">Save to: {root}/</label>
+	<input type="text" name="uri" value="{uri}"/>
+	<input type="hidden" name="cmd" value="add_or_update"/>
+	<input type="submit" value="Save" onClick="content.value = CKEDITOR.instances.editable.getData();"/>
+</form>
+<form name="cancel" action="/" method="get">
+	<input type="submit" value="Cancel" />
+</form>	
+-->

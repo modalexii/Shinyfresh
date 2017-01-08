@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<!--[if lt IE 7 ]> <html class="ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html class="ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
+<!--[if (gt IE 11)|!(IE)]><!--> <html> <!--<![endif]-->
+<head>
+	<link href="/static/style/rocketeria.css" type="text/css" rel="stylesheet">
+	<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
+	<script>
+	    if (document.documentMode===10){{
+	        document.documentElement.className+=' ie10';
+	    }}
+	    else if (document.documentMode===11){{
+	        document.documentElement.className+=' ie11';
+	    }}
+	</script>
+	<style>
+		body {{
+			background: none !important;
+		}}
+		tr:nth-child(even) {{
+		    background-color: #EEE;
+		}}
+	</style>
+<title>GCS Directory</title>
+</head>
+<body>
+	<h1 style="background: #04bde5; color: #FFF;">GCS Directory Listing</h1>
+	<br/>
+	<table border="0" cellpadding="1" cellspacing="0" style="width:100%">
+		<tbody>
+		{html_listing}
+		</tbody>
+	</table>
+	</p>
+</body>
+</html>
