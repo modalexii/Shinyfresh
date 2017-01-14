@@ -26,12 +26,19 @@
 			<option value="none">Blank</option>
 		</select>
 		<input id="newpath" type="text" placeholder="/example/mynewpage"></input>
+		<input id="pagetitle" type="text" value="Shinyfresh"></input>
 		<button id="uploadfile" class="admin_link">
 			Upload
 		</button>
 		<button id="logout" class="admin_link">
 			Log Out {nickname}
 		</button>
+		<form method="post" enctype="multipart/form-data">
+			Select a file: <input type="file" name="file">
+			<input type="submit">
+			<input type="hidden" value="upload" name="_intent"></input>
+		</form>
 	</div> <!-- /admin_content -->
 	<script src="/static/script/admin.js"></script>
+	<script src="/static/script/ckeditor/ckeditor.js"></script>
 </div> 

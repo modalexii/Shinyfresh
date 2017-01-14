@@ -13,6 +13,30 @@ def clean_path(raw_request):
 	path = urllib.unquote(path.encode('ascii')).decode('utf-8')
 	return path if path else "index"
 
+def removeCMSElements(html):
+	'''given an html string, remove all the stuff inserted by the CMS'''
+
+	from bs4 import BeautifulSoup
+
+	# remove administrative stuff
+	soup = BeautifulSoup(html,'html.parser')
+	for div in soup.find_all('div', {'class':'adminutility'}): 
+		div.decompose()
+
+	# remove templated elements
+	for div in soup.find_all('div', {'class':'template'}): 
+		div.decompose()
+
+	# remove all contenteditable properties
+	for tag in soup(): 
+		del tag['contenteditable'] 
+
+	# remove all ckeditor classes - also done client-side
+	for div in soup.findAll("div", {"class" : lambda L: L and L.startswith('cke_')}):
+		div.decompose()
+
+	return soup.prettify()
+
 class Server(webapp2.RequestHandler):
 
 	def new_if_new(self,path):
@@ -40,6 +64,12 @@ class Server(webapp2.RequestHandler):
 		or self.new_if_new(path) \
 		or database.Page.findby_path('404')
 
+		# set HTTP 404 if appropriate
+		try:
+			assert db_entry.title != '404'
+		except AssertionError:
+			self.response.set_status(404)
+
 		try:
 			# pull the template content specified in the database
 			template_contents = app_file.get(
@@ -49,7 +79,7 @@ class Server(webapp2.RequestHandler):
 			'''Failed querying db_entry.template because the property does not
 			exist - maybe db_entry is None type or something else wrong'''
 			logging.error(
-				'Database entry for "{}" has no .template'.format(path)
+				'Database entry for "{}" missing or has no .template'.format(path)
 			)
 			raise e
 		except IOError as e:
@@ -60,12 +90,12 @@ class Server(webapp2.RequestHandler):
 			)
 			raise e
 				
-				
+		# full out the template from the database
+		public_content = template_contents.format(
+			title = db_entry.title,
+			body = db_entry.html
+		)
 
-		# pull the html content...
-		meat = db_entry.html
-
-		public_content = template_contents.format(body = meat)
 		self.response.write(public_content)
 
 		if users.is_current_user_admin():
@@ -84,8 +114,6 @@ class Server(webapp2.RequestHandler):
 		saved verbatim to the same path
 		'''
 
-		from bs4 import BeautifulSoup
-
 		path = clean_path(self.request.path)
 		intent = self.request.get('_intent')
 
@@ -95,14 +123,10 @@ class Server(webapp2.RequestHandler):
 
 		elif intent == 'set' and users.is_current_user_admin(): 
 
-			scraped_content = self.request.get('content')
+			from cgi import escape
 
-			# remove administrative stuff from web content
-			soup = BeautifulSoup(scraped_content,"html.parser")
-			for div in soup.find_all('div', {'class':'adminutility'}): 
-				div.decompose()
-
-			public_content = soup.prettify()
+			scraped_content = self.request.get('content', default_value = '')
+			public_content = removeCMSElements(scraped_content)
 
 			db_entry = database.Page.findby_path(path)
 
@@ -112,7 +136,13 @@ class Server(webapp2.RequestHandler):
 					path = path,
 					template = self.request.get('template')
 				)
-				
+			
+			'''escape the title for general sanity, but don't escape the body -
+			all editors are trusted admins and should be allowed to add script
+			or other elements if they wish'''
+			db_entry.title = escape(
+				self.request.get('title', default_value = '')
+			)
 			db_entry.html = public_content
 			db_entry.put()
 
@@ -121,10 +151,24 @@ class Server(webapp2.RequestHandler):
 		elif intent == 'delete' and users.is_current_user_admin():
 
 			db_entry = database.Page.findby_path(path)
-			db_entry.delete()
+			db_entry.key.delete()
 
-			# redirect is done client side, no need to do it here
+			# redirect is done client side
+
+		elif intent == 'upload' and users.is_current_user_admin():
+
+			try:
+				db_entry = database.Blob(
+					#name = self.request.params['file'].filename,
+					#mime = self.request.params['file'].type.encode('utf-16'),
+					#blob = self.request.params['file'].value
+					name = self.request.POST.get('file').filename,
+					mime = self.request.POST.get('file').type,
+					blob = self.request.POST.get('file').file.read()
+				)
+			except AttributeError as e:
+				raise e#self.response.set_status(400)
+			else:
+				db_entry.put()
 	
-
-
 application = webapp2.WSGIApplication([(r'/.*', Server),], debug=False)

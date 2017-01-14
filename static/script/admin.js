@@ -23,7 +23,7 @@ function loadControlState(state) {
 		$('#deletethis').off('click');
 		break;
 	case 'delete_failed':
-		$('#deletethis').html('Save');
+		$('#deletethis').html('Delete');
 		assignButtonFunctions();
 		break;
 	case 'newpage_clicked':
@@ -43,6 +43,14 @@ function loadControlState(state) {
 		$('#logout').html('<img src="/static/image/wait.gif" class=buttonwaiter"/>');
 		$('#logout').off('click');
 		break;
+	case 'edit_mode':
+		$('#editthis').hide();
+		$('#deletethis').hide();
+		$('#newpage').hide();
+		$('#savethis').show();
+		$('#pagetitle').show();
+		$('#cancelthis').show();
+		break;
 	case 'newpage_editor':
 		$('#editthis').hide();
 		$('#deletethis').hide();
@@ -54,29 +62,54 @@ function loadControlState(state) {
 		$('#cancelthis').hide();
 		$('#template_select').hide();
 		$('#newpath').hide();
+		$('#pagetitle').hide();
 		break;
 	}
 }
 
-function postbackPageContent() {
+function enterEditMode() {
+	loadControlState('edit_mode');
+	$('#meat').prop('contenteditable',true);
+	$('#pagetitle').val(document.title)
+	CKEDITOR.inline('meat', {
+		startupFocus: true
+	} );
+}
+
+function disableEditing() {
+	if ( CKEDITOR.instances.meat ) {
+		CKEDITOR.instances.meat.destroy();
+	}
+}
+
+function savePage() {
 	// disable button, scrape content, post back to same path
-	loadControlState('save_clicked');
-	var content = $('body').html();
-	// capture the template value (only present in the new page editor)
-	var template = param('template');
-	$.post(window.location.pathname, {
-		'content' : content,
-		'template' : template,
-		'_intent' : 'set',
-	})
-	.done(function() {
-		location.reload();
-	})
-	.fail(function() {
-		// reenable button and inform client
-		loadControlState('save_failed');
-		alert('Sorry, the save didn\'t go through. Try again - this may be an internet blip. If this condition persists, there may be a bug.');
-	});
+	if ((window.location.pathname) === "/new") {
+		alert('Please enter a new name or path in the text field. The name "/new" is reserved.');
+	} else {
+		loadControlState('save_clicked');
+		disableEditing();
+		// trigger a change to update the document title 
+		// incase the default value was left
+		$('#pagetitle').change()
+		var content = $('#meat').html();
+		// capture the template value (only present in the new page editor)
+		var template = param('template');
+		$.post(window.location.pathname, {
+			'title' :  document.title,
+			'content' : content,
+			'template' : template,
+			'_intent' : 'set',
+		})
+		.done(function() {
+			location.reload();
+		})
+		.fail(function() {
+			// reenable button and inform client
+			loadControlState('save_failed');
+			alert('Sorry, the save didn\'t go through. Try again - this may be an internet blip. If this condition persists, there may be a bug.');
+		});
+	}
 }
 
 function deletePage() {
@@ -86,7 +119,7 @@ function deletePage() {
 		'_intent' : 'delete',
 	})
 	.done(function() {
-		window.location.href('/');
+		window.location.href = '/';
 	})
 	.fail(function() {
 		// reenable button and inform client
@@ -108,7 +141,7 @@ function logout() {
 
 function assignButtonFunctions() {
 	$('#editthis').on('click', function() { enterEditMode(); });
-	$('#savethis').on('click', function() {	postbackPageContent(); });
+	$('#savethis').on('click', function() {	savePage(); });
 	$('#cancelthis').on('click', function() { location.reload(); });
 	$('#deletethis').on('click', function() { deletePage(); });
 	$('#newpage').on('click', function() { loadControlState('newpage_clicked'); });
@@ -119,6 +152,9 @@ function assignButtonFunctions() {
 		queryString = $('#newpath').val() + location.search;
 		window.history.pushState('', '', queryString);
 	});
+	$('#pagetitle').change(function() { 
+		document.title = $('#pagetitle').val();
+	});
 }
 
 $(document).ready( function() {
@@ -126,6 +162,7 @@ $(document).ready( function() {
 	assignButtonFunctions();
 	if (window.location.pathname === '/new') {
 		loadControlState('newpage_editor');
+		enterEditMode();
 	} else {
 		loadControlState('default');
 	}
