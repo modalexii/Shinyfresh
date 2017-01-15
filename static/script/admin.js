@@ -31,17 +31,24 @@ function loadControlState(state) {
 		$('#newpage').off('click');
 		$('#editthis').prop( "disabled", true );
 		$('#deletethis').prop( "disabled", true );
-		$('#uploadfile').prop( "disabled", true );
+		$('#managefiles').prop( "disabled", true );
 		$('#cancelthis').show();
-		$('#template_select').show();
+		$('#templateselect').show();
 		break;
-	case 'template_select_change':
+	case 'templateselect_change':
 		$('#newpage').prop( "disabled", true );
-		$('#template_select').prop( "disabled", true );
+		$('#templateselect').prop( "disabled", true );
 		break;
 	case 'logout_clicked':
 		$('#logout').html('<img src="/static/image/wait.gif" class=buttonwaiter"/>');
 		$('#logout').off('click');
+		break;
+	case 'managefiles_clicked':
+		if ($('#filemanager').is(':visible')) {
+			$('#filemanager').hide();
+		} else {
+			$('#filemanager').show();
+		}
 		break;
 	case 'edit_mode':
 		$('#editthis').hide();
@@ -50,19 +57,22 @@ function loadControlState(state) {
 		$('#savethis').show();
 		$('#pagetitle').show();
 		$('#cancelthis').show();
+		$('.insertobject').show();
 		break;
 	case 'newpage_editor':
 		$('#editthis').hide();
 		$('#deletethis').hide();
 		$('#newpage').hide();
-		$('#template_select').hide();
+		$('#templateselect').hide();
+		$('#filemanager').hide();
 		break;
 	default:
 		$('#savethis').hide();
 		$('#cancelthis').hide();
-		$('#template_select').hide();
+		$('#templateselect').hide();
 		$('#newpath').hide();
 		$('#pagetitle').hide();
+		$('#filemanager').hide();
 		break;
 	}
 }
@@ -129,8 +139,48 @@ function deletePage() {
 }
 
 function createPage() {
-	var template = $('#template_select option:selected').val();
+	// redirect to /new, with the chosen template in the query string
+	var template = $('#templateselect option:selected').val();
 	window.location.href = '/new?template=' + template;
+}
+
+function toggleFileManager() {
+	// show/hide the file manager
+	$.get( "/files/").done( function( data ) {
+		$.when( $('#filemanager_index').html(data) )
+		.done( function() {
+			assignDeleteButtonFunctions();
+			assignInsertButtonFunctions();
+			if ($('#meat').prop('contenteditable') === "true") {
+				$('.insertobject').show();
+			} else {
+				$('.insertobject').hide();
+			}
+		})
+	});
+	loadControlState('managefiles_clicked');
+}
+
+function assignDeleteButtonFunctions() {
+	$('.deletefile').on('click', function() { 
+		var $buttonClicked = $(this);
+		$.post("/files/delete", {
+			'filename' : $buttonClicked.attr('name')
+		})
+		.done( function() {
+			// hide the div containing the thumb, link and button
+			$buttonClicked.parent().hide();
+		})
+	})
+}
+
+function assignInsertButtonFunctions() {
+	$('.insertobject').on('click', function() { 
+		var src = $(this).attr('link');
+		var imgHtml = '<img class="inserted" src="' + src + '"></img>';
+		var imgHtmlObject = CKEDITOR.dom.element.createFromHtml(imgHtml);
+		CKEDITOR.instances.meat.insertElement(imgHtmlObject);
+	})
 }
 
 function logout() {
@@ -145,8 +195,8 @@ function assignButtonFunctions() {
 	$('#cancelthis').on('click', function() { location.reload(); });
 	$('#deletethis').on('click', function() { deletePage(); });
 	$('#newpage').on('click', function() { loadControlState('newpage_clicked'); });
-	$('#template_select').change(function() { createPage(); });
-	$('#uploadfile').on('click', function() { launchUploader(); });
+	$('#templateselect').change(function() { createPage(); });
+	$('#managefiles').on('click', function() { toggleFileManager(); });
 	$('#logout').on('click', function() { logout(); });
 	$('#newpath').change(function() { 
 		queryString = $('#newpath').val() + location.search;

@@ -18,7 +18,7 @@
 		<button id="newpage" class="admin_link">
 			New Page 
 		</button>
-		<select id="template_select">
+		<select id="templateselect">
 			<option value="" disabled selected hidden>Choose template</option>
 			<option value="child">Child</option>
 			<option value="index">Index</option>
@@ -27,18 +27,22 @@
 		</select>
 		<input id="newpath" type="text" placeholder="/example/mynewpage"></input>
 		<input id="pagetitle" type="text" value="Shinyfresh"></input>
-		<button id="uploadfile" class="admin_link">
-			Upload
+		<button id="managefiles" class="admin_link">
+			Manage Files
 		</button>
-		<button id="logout" class="admin_link">
+		<button id="logout" class="adminlink">
 			Log Out {nickname}
 		</button>
-		<form method="post" enctype="multipart/form-data">
-			Select a file: <input type="file" name="file">
-			<input type="submit">
+	</div> <!-- /admin_content -->
+	<div id="filemanager">
+		<form id="uploadfile" action="/files/upload" method="post" enctype="multipart/form-data">
+			<input type="file" name="file"></input>
+			<input type="submit"></input>
 			<input type="hidden" value="upload" name="_intent"></input>
 		</form>
-	</div> <!-- /admin_content -->
+		<div id="filemanager_index">
+		</div>
+	</div> <!--/filemanager -->
 	<script src="/static/script/admin.js"></script>
 	<script src="/static/script/ckeditor/ckeditor.js"></script>
 </div> 

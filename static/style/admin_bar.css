@@ -1,0 +1,11 @@
+.filebrowser_thumb {
+	display: inline;
+}
+
+.filebrowser_nothumb {
+	display: inline;
+}
+
+img.inserted {
+	width: 400px;
+}

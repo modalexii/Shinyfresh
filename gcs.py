@@ -1,114 +1,130 @@
-# Copyright 2012 Google Inc. All Rights Reserved.
-
-#[START sample]
-"""A sample app that uses GCS client to operate on bucket and file."""
-
-#[START imports]
-import logging
-import os
+import webapp2,logging,os,urllib
+from google.appengine.api import users, app_identity
 import cloudstorage as gcs
-import webapp2
+import generators
 
-from google.appengine.api import app_identity
-#[END imports]
-
-#[START retries]
-my_default_retry_params = gcs.RetryParams(initial_delay=0.2,
-                                          max_delay=5.0,
-                                          backoff_factor=2,
-                                          max_retry_period=15)
+my_default_retry_params = gcs.RetryParams(
+    initial_delay=0.2,
+    max_delay=5.0,
+    backoff_factor=2,
+    max_retry_period=15
+)
 gcs.set_default_retry_params(my_default_retry_params)
-#[END retries]
+
+default_bucket = os.environ.get(
+    'BUCKET_NAME',
+    app_identity.get_default_gcs_bucket_name()
+)
 
 
-class MainPage(webapp2.RequestHandler):
-  """Main page for GCS demo application."""
+class GCSInterface(webapp2.RequestHandler):
 
+    def get(self):
+        '''
+        Handle HTTP GETs - serve blobs or an index
+        '''
 
-  def get(self):
+        gcs_abs_path = generators.http_to_gcs_path(
+            self.request.path,
+            default_bucket
+        )
 
-    bucket_name = os.environ.get(
-        'BUCKET_NAME',
-        app_identity.get_default_gcs_bucket_name()
-    )
-
-    bucket = '/' + bucket_name
-    '''
-    try:
-      self.create_file(filename)
-      self.response.write('\n\n')
-
-      self.read_file(filename)
-      self.response.write('\n\n')
-
-      self.stat_file(filename)
-      self.response.write('\n\n')
-
-      self.create_files_for_list_bucket(bucket)
-      self.response.write('\n\n')
-
-      self.list_bucket(bucket)
-      self.response.write('\n\n')
-
-      self.list_bucket_directory_mode(bucket)
-      self.response.write('\n\n')
-
-    except Exception, e:
-      logging.exception(e)
-      self.delete_files()
-      self.response.write('\n\nThere was an error running the demo! '
-                          'Please check the logs for more details.\n')
-
-    else:
-      self.delete_files()
-      self.response.write('\n\nThe demo ran successfully!\n')
-    '''
-    def post(self):
-
+        try:
+            self.serve_file(gcs_abs_path)
+        except AttributeError:
+            self.response.set_status('404')
+        except ValueError:
+            # depends on no blob being named 'index'
+            self.serve_admin_file_index()
         
+    def post(self):
+        '''
+        Handle HTTP POSTs - upload or delete blobs
+        '''
 
+        path = self.request.path
 
+        if path == '/files/upload' and users.is_current_user_admin():
 
-#[START write]
-    def create_file(self, name, mime, blob):
-        gcs_file = gcs.open(name, 'w', content_type = mime)
+            try:
+                name = self.request.POST.get('file').filename
+                mime = self.request.POST.get('file').type 
+                blob = self.request.POST.get('file').file.read()
+            except AttributeError:
+                self.response.set_status('400')
+            else:
+                gcs_abs_path = generators.http_to_gcs_path(
+                    name, 
+                    default_bucket
+                )
+                self.create_file(gcs_abs_path, mime, blob)
+
+        elif path == '/files/delete' and users.is_current_user_admin():
+
+            gcs_abs_path = generators.http_to_gcs_path(
+                # another layer of not accounting for pseudo-directories
+                self.request.get('filename'), 
+                default_bucket
+            )
+            self.delete_files(gcs_abs_path)
+
+    def create_file(self, gcs_abs_path, mime, blob):
+        '''
+        Write a new GCS blob
+        '''
+        gcs_file = gcs.open(gcs_abs_path, 'w', content_type = mime)
         gcs_file.write(blob)
         gcs_file.close()
-#[END write]
 
-#[START read]
-    def read_file(self, filename):
-        gcs_file = gcs.open(filename)
+    def serve_file(self, gcs_abs_path):
+        '''
+        Write a file out to the client. Sends HTTP, returns nothing.
+        '''
+        mime = gcs.stat(gcs_abs_path).content_type
+        self.response.headers['Content-Type'] = mime
+        gcs_file = gcs.open(gcs_abs_path)
         self.response.write(gcs_file.read())
         gcs_file.close()
-#[END read]
 
-    def stat_file(self, filename):
-        self.response.write('File stat:\n')
+    def serve_html_index(self, bucket = default_bucket):
+        '''
+        Write out a (barely) HTML text index. Sends HTTP, returns nothing. 
+        Not in use.
+        '''
+        bucket = '/{}'.format(bucket)
+        for stat in gcs.listbucket(bucket, delimiter = '/'):
+            gcs_abs_path = stat.filename
+            http_path = gcs_abs_path.replace(bucket, '/files')
+            self.response.write(http_path)
+            self.response.write('<br>')
 
-        stat = gcs.stat(filename)
-        self.response.write(repr(stat))
+    def serve_admin_file_index(self, bucket = default_bucket):
+        '''
+        Write out the admin bar file index. Sends HTTP, returns nothing.
+        '''
+        html = generators.admin_file_index(bucket)
+        self.response.write(html)
 
+    def delete_files(self, gcs_abs_path):
+        '''
+        Delete a blob from GCS 
+        '''
+        from google.appengine.api import images
 
-    def list_bucket_directory_mode(self, bucket):
-        self.response.write('Listbucket directory mode result:\n')
-        for stat in gcs.listbucket(bucket + '/b', delimiter='/'):
-            self.response.write('%r' % stat)
-            self.response.write('\n')
-            if stat.is_dir:
-                for subdir_file in gcs.listbucket(stat.filename, delimiter='/'):
-                self.response.write('  %r' % subdir_file)
-                self.response.write('\n')
-
-#[START delete_files]
-    def delete_files(self, filename):
         try:
-            gcs.delete(filename)
+            gcs.delete(gcs_abs_path)
         except gcs.NotFoundError:
             pass
-#[END delete_files]
-
-
-application = webapp2.WSGIApplication([('/user/', MainPage)],
-                              debug=True)
-#[END sample]
+        '''
+        per docs we should also destroy the serving url, but how to
+        obtain the blobkey is unclear, possibly not necessary? seems
+        to work for now...
+        images.delete_serving_url(
+            gcs.stat(gcs_abs_path).etag
+        )
+        '''
+        
+application = webapp2.WSGIApplication(
+    [('/files/.*', GCSInterface)],
+    debug=False
+)

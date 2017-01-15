@@ -27,6 +27,10 @@ def removeCMSElements(html):
 	for div in soup.find_all('div', {'class':'template'}): 
 		div.decompose()
 
+	# remove "inserted" elements - imames chosen from the admin browser
+	for img in soup.find_all('img', {'class':'inserted'}):
+		img["class"].remove('inserted')
+
 	# remove all contenteditable properties
 	for tag in soup(): 
 		del tag['contenteditable'] 
@@ -154,21 +158,5 @@ class Server(webapp2.RequestHandler):
 			db_entry.key.delete()
 
 			# redirect is done client side
-
-		elif intent == 'upload' and users.is_current_user_admin():
-
-			try:
-				db_entry = database.Blob(
-					#name = self.request.params['file'].filename,
-					#mime = self.request.params['file'].type.encode('utf-16'),
-					#blob = self.request.params['file'].value
-					name = self.request.POST.get('file').filename,
-					mime = self.request.POST.get('file').type,
-					blob = self.request.POST.get('file').file.read()
-				)
-			except AttributeError as e:
-				raise e#self.response.set_status(400)
-			else:
-				db_entry.put()
 	
 application = webapp2.WSGIApplication([(r'/.*', Server),], debug=False)

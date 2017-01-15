@@ -34,7 +34,7 @@ handlers:
 - url: /logout# Hand-off
   script: authentication.application
 
-- url: /user/.* # Catch-all
+- url: /files/.*
   script: gcs.application
 
 - url: /.* # Catch-all
