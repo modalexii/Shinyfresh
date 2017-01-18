@@ -1,11 +1,15 @@
-.filebrowser_thumb {
-	display: inline;
+
+div#dropzone_container {
+    width: 100px;
+    float: left;
 }
 
-.filebrowser_nothumb {
-	display: inline;
+div#filemanager_index {
+    overflow: hidden;
 }
 
 img.inserted {
 	width: 400px;
 }
+
+

@@ -1,5 +1,5 @@
 <div id="adminbar" class="adminutility">
-	<div id="admincontent">
+		<div id="admincontent">
 		<div id="currentpageoperations">
 			<span id="currentpagelabel">Current Page: </span>
 			<button id="cancelthis" class="admin_link">
@@ -35,14 +35,29 @@
 		</button>
 	</div> <!-- /admin_content -->
 	<div id="filemanager">
-		<form id="uploadfile" action="/files/upload" method="post" enctype="multipart/form-data">
+		<!--
+		<form id="test" action="/files/upload" method="post" enctype="multipart/form-data">
 			<input type="file" name="file"></input>
 			<input type="submit"></input>
 			<input type="hidden" value="upload" name="_intent"></input>
 		</form>
-		<div id="filemanager_index">
+		-->
+		<script src="/static/script/dropzone.js"></script>
+		<script src="/static/script/dropzone-config.js"></script>
+		
+
+		<div id="dropzone_container">
+			<form id="admin_bar_dropzone" action="/files/upload" class="dropzone">
+				<input type="hidden" value="upload" name="_intent"></input>
+			</form>
 		</div>
+
+		<div id="filemanager_index" class="filemanager_index">
+			<!-- populated with thumbnails -->
+		</div>
+		
 	</div> <!--/filemanager -->
-	<script src="/static/script/admin.js"></script>
+	<script src="/static/script/slick/slick.min.js"></script>
 	<script src="/static/script/ckeditor/ckeditor.js"></script>
+	<script src="/static/script/admin.js"></script>
 </div> 

@@ -118,7 +118,7 @@ class GCSInterface(webapp2.RequestHandler):
         '''
         per docs we should also destroy the serving url, but how to
         obtain the blobkey is unclear, possibly not necessary? seems
-        to work for now...
+        to work for now, but leaves a bunch of orphaned entries
         images.delete_serving_url(
             gcs.stat(gcs_abs_path).etag
         )

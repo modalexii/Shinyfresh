@@ -55,7 +55,7 @@ def admin_file_index(gcs_bucket):
             src_thumb = images.get_serving_url(
                 None, 
                 filename = gcs_handoff_uri,
-                size = 150,
+                size = 100,
                 crop = True
             )
             # get a public url for the full image

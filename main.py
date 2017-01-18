@@ -27,10 +27,6 @@ def removeCMSElements(html):
 	for div in soup.find_all('div', {'class':'template'}): 
 		div.decompose()
 
-	# remove "inserted" elements - imames chosen from the admin browser
-	for img in soup.find_all('img', {'class':'inserted'}):
-		img["class"].remove('inserted')
-
 	# remove all contenteditable properties
 	for tag in soup(): 
 		del tag['contenteditable'] 

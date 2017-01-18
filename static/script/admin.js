@@ -4,8 +4,12 @@ function param(name) {
 }
 
 function injectCSS() {
-	// append css for admin bar
+	// for admin bar
 	$('head').append('<link rel="stylesheet" type="text/css" href="/static/style/admin_bar.css">');
+	// for slick carousel
+	$('head').append('<link rel="stylesheet" type="text/css" href="/static/script/slick/slick.css">');
+	$('head').append('<link rel="stylesheet" type="text/css" href="/static/script/slick/slick-theme.css">');
+	// for dropzone
 }
 
 function loadControlState(state) {
@@ -144,8 +148,8 @@ function createPage() {
 	window.location.href = '/new?template=' + template;
 }
 
-function toggleFileManager() {
-	// show/hide the file manager
+function populateThumbnails() {
+	// fetch thumbnails and overwrite current index contents
 	$.get( "/files/").done( function( data ) {
 		$.when( $('#filemanager_index').html(data) )
 		.done( function() {
@@ -156,8 +160,25 @@ function toggleFileManager() {
 			} else {
 				$('.insertobject').hide();
 			}
+			$('.filemanager_index').slick({
+				infinite: true,
+				dots: true,
+				slidesToShow: 6,
+				slidesToScroll: 6
+			});
 		})
 	});
+}
+
+function toggleFileManager() {
+	// show/hide the file manager
+	if ($('#filemanager').prop('loaded') !== true) {
+		// load thumbnails
+		populateThumbnails();
+		// set loaded flag
+		$('#filemanager').prop('loaded',true);
+	}
+
 	loadControlState('managefiles_clicked');
 }
 
@@ -198,6 +219,7 @@ function assignButtonFunctions() {
 	$('#templateselect').change(function() { createPage(); });
 	$('#managefiles').on('click', function() { toggleFileManager(); });
 	$('#logout').on('click', function() { logout(); });
+	$('#uploadfile').on("submit", function (e) { e.preventDefault(); });
 	$('#newpath').change(function() { 
 		queryString = $('#newpath').val() + location.search;
 		window.history.pushState('', '', queryString);
@@ -215,7 +237,7 @@ $(document).ready( function() {
 		enterEditMode();
 	} else {
 		loadControlState('default');
-	}
+	}    
 });
 /*
 function savePage() {
