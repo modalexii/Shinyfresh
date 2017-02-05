@@ -1,15 +1,283 @@
+div#adminbar {
+    text-align: center;
+    color: darkorange;
+    background-color: gray;
+    line-height: 3em;
+    font-family: sans-serif;
+    position: fixed;
+    width: 100%;
+    bottom: 20px;
+}
+
+button{
+    height: 3em;
+}
+
+button.admin_link {
+    height: 3em;
+    width: 10%;
+    color: #444;
+}
+
+div.button_seperator {
+    display: inline-block;
+    color: darkorange;
+}
 
 div#dropzone_container {
-    width: 100px;
-    float: left;
+    text-align: center;
+    line-height: 7em;
+    border: 1px solid darkorange;
 }
 
-div#filemanager_index {
-    overflow: hidden;
+div#dropzone_container:hover {
+    cursor: pointer;
 }
 
-img.inserted {
-	width: 400px;
+.info {
+  /* informational controls */
+  background-color: blue;
+
 }
 
+.safe {
+  /* nondestructive modification triggers */
+  background-color: green;
 
+}
+
+.warn {
+  /* minor destructive triggers */
+  background-color: yellow;
+}
+
+.danger {
+  /* permanant destructive triggers */
+  background-color: red;
+}
+
+/* ----- BEGIN GALLERY SCOPE ITEMS ----- */
+
+/*
+These elements are generally in the scope of gallery.css but
+are provided here beceuse they are only applicable to the file
+manager and shouldn't be served to normal visitors.
+
+Breakpoints for text links were left in gallery.js to avoid
+duplication of breakpoint settings.
+*/
+
+.boxInner:hover > button.image {
+  /* show the info button */
+  display: inherit;
+}
+
+.boxInner:focus > button.image {
+  /* show the info button (mobile) */
+  display: inherit;
+}
+
+.text_link {
+  /* file browser */
+  display: inline-block;
+  position: relative;
+  margin-right: 1%;
+  padding-right: 5px;
+  border: 1px dashed darkorange;
+}
+
+button.action {
+  color: #444;
+}
+
+button.delete {
+  float: left;
+  margin-right: 5px;
+  background-color: darkorange;
+}
+
+button.image {
+  position: absolute;
+  width: 100%;
+  height: 3em;
+  display: none; /* hide by default, show on hover/focus */
+}
+
+button.action:hover {
+  cursor: pointer;
+}
+
+button#image_info_delete {
+  float: right;
+}
+
+/* GALLERY EDIT MODE */
+
+
+
+/* END GALLERY EDIT MODE */
+
+/* ----- END GALLERY SCOPE ITEMS ----- */
+
+/* ----- BEGIN IMAGE INFO POPUP ----- */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 200ms;
+  visibility: hidden;
+  opacity: 0;
+}
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  width: 35%;
+  position: relative;
+}
+
+.popup .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+.popup .close:hover {
+  color: darkorange;
+}
+.popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+
+img.image_info.thumb {
+    margin: 0 auto;
+    display: block;
+    max-width: 75%
+}
+
+.image_info.file_name {
+    margin-top: 7%;
+}
+
+h2.image_info {
+  color: darkorange;
+  display: inline;
+}
+
+.image_info.header {
+  font-weight: bold
+}
+
+input#image_info_user_size {
+    width: 4em;
+}
+
+div.textfield_label_wrap {
+  margin-left: auto;
+  margin-right: auto;
+  margin: 15px 0 15px 0;
+  padding: 15px 0 15px 0;
+  border-bottom: 1px solid darkorange;
+}
+
+div.gallery.textfield_label_wrap {
+  margin-left: auto;
+  margin-right: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+div.textfield_label {
+  float: left;
+  width: 15%; /* change 1/2 */
+}
+
+input#image_info_url, input#image_info_user_url {
+  width: 65%;
+}
+
+div.textfield_copy {
+  float: right;
+  width: 15%; /* change 2/2 */
+}
+
+@media only screen and (max-width: 800px){
+  .box{
+    width: 70%;
+  }
+  .popup{
+    width: 70%;
+  }
+}
+
+/* ----- END IMAGE INFO POPUP ----- */
+
+/* ----- BEGIN GALLERY ENTRY POPUP ----- */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 200ms;
+  visibility: hidden;
+  opacity: 0;
+}
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  width: 40%;
+  position: relative;
+}
+
+img.image_info.thumb {
+    margin: 0 auto;
+    display: block;
+    max-width: 75%
+}
+
+div.image_info.field_label, div.image_info.text_field {
+  display: inline-block;
+}
+
+div.image_info.field_label {
+  width: 20%;
+  float: left;
+}
+
+input.image_info.gallery, div.image_info.text_field, textarea.image_info.gallery {
+  width: 80%;
+}
+
+textarea.image_info.gallery {
+  resize: vertical;
+  height: 4em;
+}
+
+button.image_info {
+    width: 30%;
+}
+
+/* ----- END GALLERY TILE POPUP ----- */

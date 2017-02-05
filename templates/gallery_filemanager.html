@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<head>
+    <title>File Manager - Shinyfresh!</title>
+    <link rel="stylesheet" href="/static/style/shinyfresh.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="/static/style/gallery.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="/static/style/admin_bar.css" type="text/css" media="screen">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="header">
+    </div>
+    <div id="meat">
+
+        <script src="/static/script/dropzone.js"></script>
+        <script src="/static/script/dropzone-config.js"></script>
+
+        <div id="dropzone_container">
+            <form id="admin_bar_dropzone" action="/files/upload" class="dropzone">
+                <input type="hidden" value="upload" name="_intent"></input>
+            </form>
+        </div>
+
+        <h1>Misc Files</h1>
+        {text_links}
+
+        <h1>Images</h1>
+        
+        <div class="wrap">
+        {thumbs}
+        </div>  <!-- /#wrap -->
+
+    </div> <!-- /meat -->
+    <div id="footer">
+    </div>
+
+    <div id="imageinfo" class="overlay">
+        <div class="popup">
+            <a class="image_info close" href="#">&times;</a>
+            <div class="image_info" id="image_info_thumb">
+            <a class="image_info" id="thumb_to_full" href="" target="_blank" name="Open full size">
+                <img class="image_info thumb" ></img>
+            </a>
+            </div>
+            <div class="content">
+                <div class="image_info file_name">
+                    <h2 class="image_info" id="image_info_name">placeholder.txt</h2>
+                    <button class="action delete file" id="image_info_delete" title="Delete Image">Delete</button>
+                </div>
+                <div class="image_info textfield_label_wrap">
+                    <div class="image_info textfield_label">
+                        Full Size: 
+                    </div>
+                    <div class="image_info textfield_copy">
+                        <button class="image_info" id="image_info_url_copy">Copy</button>
+                    </div>
+                    <div class="image_info textfield">
+                        <input type="text" class="image_info" id="image_info_url"></input>
+                    </div>
+                </div>
+                <div class="image_info header">Scaled Link Builder</div>
+                <p class="image_info_tip">
+                Tip: Enter a size 200-300 pixels larger than you think you'll need, then use the WYSIWYG to scale it as desired once you've placed it in your content
+                </p>
+                Longest side length: 
+                <input type="number" class="image_info" id="image_info_user_size" value="800"></input> pixels
+                <div class="image_info textfield_label_wrap">
+                    <div class="image_info textfield_label">
+                        Scaled:  
+                    </div>
+                    <div class="image_info textfield_copy">
+                        <button class="image_info" id="image_info_user_copy">Copy</button>
+                    </div>
+                    <div class="image_info textfield">
+                        <input type="text" class="image_info" id="image_info_user_url"></input>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="/static/script/admin.js"></script>

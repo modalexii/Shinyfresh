@@ -6,10 +6,20 @@ function param(name) {
 function injectCSS() {
 	// for admin bar
 	$('head').append('<link rel="stylesheet" type="text/css" href="/static/style/admin_bar.css">');
-	// for slick carousel
-	$('head').append('<link rel="stylesheet" type="text/css" href="/static/script/slick/slick.css">');
-	$('head').append('<link rel="stylesheet" type="text/css" href="/static/script/slick/slick-theme.css">');
-	// for dropzone
+}
+
+function copyToClipboard(containerid) {
+	if (document.selection) { 
+		var range = document.body.createTextRange();
+		range.moveToElementText(document.getElementById(containerid));
+		range.select().createTextRange();
+		document.execCommand("Copy"); 
+	} else if (window.getSelection) {
+		var range = document.createRange();
+		range.selectNode(document.getElementById(containerid));
+		window.getSelection().addRange(range);
+		document.execCommand("Copy");
+	}
 }
 
 function loadControlState(state) {
@@ -47,27 +57,36 @@ function loadControlState(state) {
 		$('#logout').html('<img src="/static/image/wait.gif" class=buttonwaiter"/>');
 		$('#logout').off('click');
 		break;
-	case 'managefiles_clicked':
-		if ($('#filemanager').is(':visible')) {
-			$('#filemanager').hide();
-		} else {
-			$('#filemanager').show();
-		}
-		break;
-	case 'edit_mode':
+	case 'edit_mode_wysiwyg':
 		$('#editthis').hide();
 		$('#deletethis').hide();
 		$('#newpage').hide();
+		$('#logout').hide();
+		$('.button_seperator').hide();
+		$('#current_page_label').hide();
+		$('#newtile').hide();
 		$('#savethis').show();
 		$('#pagetitle').show();
 		$('#cancelthis').show();
-		$('.insertobject').show();
+		break;
+	case 'edit_mode_gallery':
+		$('#editthis').hide();
+		$('#deletethis').hide();
+		$('#newpage').hide();
+		$('#logout').hide();
+		$('.button_seperator').hide();
+		$('#current_page_label').hide();
+		$('#newtile').show();
+		$('#savethis').show();
+		$('#pagetitle').show();
+		$('#cancelthis').show();
 		break;
 	case 'newpage_editor':
 		$('#editthis').hide();
 		$('#deletethis').hide();
 		$('#newpage').hide();
 		$('#templateselect').hide();
+		$('#newtile').hide();
 		$('#filemanager').hide();
 		break;
 	default:
@@ -76,13 +95,14 @@ function loadControlState(state) {
 		$('#templateselect').hide();
 		$('#newpath').hide();
 		$('#pagetitle').hide();
+		$('#newtile').hide();
 		$('#filemanager').hide();
 		break;
 	}
 }
 
-function enterEditMode() {
-	loadControlState('edit_mode');
+function enterWYSIWYGEditMode() {
+	loadControlState('edit_mode_wysiwyg');
 	$('#meat').prop('contenteditable',true);
 	$('#pagetitle').val(document.title)
 	CKEDITOR.inline('meat', {
@@ -90,10 +110,15 @@ function enterEditMode() {
 	} );
 }
 
-function disableEditing() {
+function disableWYSIWYGEditing() {
 	if ( CKEDITOR.instances.meat ) {
 		CKEDITOR.instances.meat.destroy();
 	}
+}
+
+function enterGalleryEditMode () {
+	loadControlState('edit_mode_gallery');
+	
 }
 
 function savePage() {
@@ -102,7 +127,7 @@ function savePage() {
 		alert('Please enter a new name or path in the text field. The name "/new" is reserved.');
 	} else {
 		loadControlState('save_clicked');
-		disableEditing();
+		disableWYSIWYGEditing();
 		// trigger a change to update the document title 
 		// incase the default value was left
 		$('#pagetitle').change()
@@ -148,60 +173,80 @@ function createPage() {
 	window.location.href = '/new?template=' + template;
 }
 
-function populateThumbnails() {
-	// fetch thumbnails and overwrite current index contents
-	$.get( "/files/").done( function( data ) {
-		$.when( $('#filemanager_index').html(data) )
-		.done( function() {
-			assignDeleteButtonFunctions();
-			assignInsertButtonFunctions();
-			if ($('#meat').prop('contenteditable') === "true") {
-				$('.insertobject').show();
-			} else {
-				$('.insertobject').hide();
-			}
-			$('.filemanager_index').slick({
-				infinite: true,
-				dots: true,
-				slidesToShow: 6,
-				slidesToScroll: 6
-			});
-		})
-	});
+function launchFileManager() {
+	// open the file manager
+	window.open('/files/','File Manager').focus()
 }
 
-function toggleFileManager() {
-	// show/hide the file manager
-	if ($('#filemanager').prop('loaded') !== true) {
-		// load thumbnails
-		populateThumbnails();
-		// set loaded flag
-		$('#filemanager').prop('loaded',true);
-	}
+function populateInfoFromThumb (buttonClicked) {
+	// given the object representing an image info button,
+	// populate the imageinfo lightbox fields
 
-	loadControlState('managefiles_clicked');
+	// scrape properties from thumb that was clicked
+	var fileName = $buttonClicked.attr('name');
+	var fullUrl = $buttonClicked.siblings('a.thumb').attr('href');
+	var metaTitle = $buttonClicked.siblings('div.title').html();
+	var metaDescription = $buttonClicked.siblings('div.caption').html();
+	var metaDate = $buttonClicked.siblings('div.date').html();
+	var metaMedia = $buttonClicked.siblings('div.media').html();
+
+	// assign properties to image info lightbox
+	$('img.image_info.thumb').arrt('src', fullUrl + '=s250c');
+}
+
+function populateThumbFromInfo (thumb) {
+
 }
 
 function assignDeleteButtonFunctions() {
-	$('.deletefile').on('click', function() { 
+	$('button.action.delete').on('click', function() { 
 		var $buttonClicked = $(this);
 		$.post("/files/delete", {
 			'filename' : $buttonClicked.attr('name')
 		})
 		.done( function() {
 			// hide the div containing the thumb, link and button
-			$buttonClicked.parent().hide();
+			location.reload();
 		})
 	})
 }
 
-function assignInsertButtonFunctions() {
-	$('.insertobject').on('click', function() { 
-		var src = $(this).attr('link');
-		var imgHtml = '<img class="inserted" src="' + src + '"></img>';
-		var imgHtmlObject = CKEDITOR.dom.element.createFromHtml(imgHtml);
-		CKEDITOR.instances.meat.insertElement(imgHtmlObject);
-	})
+function assignInfoButtonFunctions() {
+	$('button.action.info').on('click', function () {
+		// scrape properties from thumb that was clicked
+		var $buttonClicked = $(this);
+		var fileName = $buttonClicked.attr('name');
+		var correspondingThumb = $buttonClicked.siblings('a.thumb');
+		var fullUrl = correspondingThumb.attr('href');
+		var thumbURL = correspondingThumb.children('img').attr('src');
+		// assign properties of image info lightbox
+		$('#image_info_name').html(fileName);
+		$('img.image_info.thumb').attr('src', thumbURL);
+		$('input#image_info_url').val(fullUrl);
+		$('thumb_to_full').attr('src', fullUrl);
+		$('#thumb_to_full').attr('href', fullUrl);
+		$('#image_info_delete').attr('name', fileName);
+		updateScaledURL();
+		window.location.hash = 'imageinfo';
+	});
+	$('#image_info_url_copy').on('click', function () {
+		copyToClipboard('image_info_url');
+	});
+	$('#image_info_user_copy').on('click', function () {
+		copyToClipboard('image_info_user_url');
+	});
+	// close lightbox on background click
+	$('#imageinfo.overlay').on('click', function () {
+		window.location.hash = '#';
+	});
+}
+
+function updateScaledURL() {
+	// update the scaled url in the image info lightbox
+	var userPixels = $('#image_info_user_size').val();
+	var thumbURL = $('img.image_info.thumb').attr('src');
+	var userScaleURL = thumbURL.replace(/=s[\d]{1,5}/, '=s' + userPixels);
+	$('#image_info_user_url').val(userScaleURL);
 }
 
 function logout() {
@@ -211,15 +256,20 @@ function logout() {
 }
 
 function assignButtonFunctions() {
-	$('#editthis').on('click', function() { enterEditMode(); });
+	$('#editthis').on('click', function() { 
+		if ( $('#adminbar').attr('data-mode') === 'standard' ) {
+			enterWYSIWYGEditMode();
+		} else if ( $('#adminbar').attr('data-mode') === 'gallery' ) {
+			enterGalleryEditMode();
+		}
+	});
 	$('#savethis').on('click', function() {	savePage(); });
 	$('#cancelthis').on('click', function() { location.reload(); });
 	$('#deletethis').on('click', function() { deletePage(); });
 	$('#newpage').on('click', function() { loadControlState('newpage_clicked'); });
 	$('#templateselect').change(function() { createPage(); });
-	$('#managefiles').on('click', function() { toggleFileManager(); });
+	$('#managefiles').on('click', function() { launchFileManager(); });
 	$('#logout').on('click', function() { logout(); });
-	$('#uploadfile').on("submit", function (e) { e.preventDefault(); });
 	$('#newpath').change(function() { 
 		queryString = $('#newpath').val() + location.search;
 		window.history.pushState('', '', queryString);
@@ -233,193 +283,19 @@ $(document).ready( function() {
 	injectCSS();
 	assignButtonFunctions();
 	if (window.location.pathname === '/new') {
+		// new page template
 		loadControlState('newpage_editor');
-		enterEditMode();
+		if ( $('#adminbar').attr('data-mode') === 'standard' ) {
+			enterWYSIWYGEditMode();
+		} else if ( $('#adminbar').attr('data-mode') === 'gallery' ) {
+			enterGalleryEditMode();
+		}
+	} else if (window.location.pathname === '/files/') {
+		// file manager
+		assignDeleteButtonFunctions();
+		assignInfoButtonFunctions();
 	} else {
 		loadControlState('default');
 	}    
-});
-/*
-function savePage() {
-	var resource = $.trim($('input[name="resource"]').prop('value'));
-	if(resource == '') {
-		alert('Please enter a URI for this page!');
-		$('input[name="resource"]').addClass('red_border');
-	}
-	else {
-		$('#save').html('<img src="/static/image/wait.gif" class=buttonwaiter"/>');
-		$('#save').off('click');
-		// the following assumes that all editable pages are identical
-		// content has to be recreated
-		// if it is captured with outerHTML, we get all the ckeditor junk too
-		var content_template = '<div id="header-sub"><img class="bg-header-sub" src="{0}" width="705px" height="82px"/><h1>{1}</h1></div><!-- /header-sub --><div id="content_sub">{2}</div><!-- /content_sub -->'
-		var CKEData = CKEDITOR.instances.content_sub.getData();
-		var content = String.format(
-			content_template,
-			$('img.bg-header-sub').attr('src'),
-			$('#header-sub h1').html(),
-			CKEData
-		);
-
-		$.post('/modify/publish', {
-			'content' : content,
-			'resource' : resource,
-		})
-		.done(function() {
-			window.location.replace('/' + $.trim(resource));
-		})
-		.fail(function() {
-			alert('Sorry, the save didn\'t go through. Check your internet connection. If this condition persists, please file a bug.');
-			$('#save').html('Save');
-			$('#save').on('click', function() {
-				savePage();
-			});
-		});
-	}
-}
-
-function enterEditingMode(newPath) {
-	$('#content_sub').prop('contenteditable',true);
-	$('#header-sub h1').prop('contenteditable',true);
-	$('#editthis').removeClass('admin_link');
-	$('#editthis').html(
-		'Save to: ' + window.location.hostname + '/' +
-		'<input type="text" name="resource" value="' + newPath + '" />' +
-		'<div id="save" class="admin_link">Save</div>' +
-		'<div id="cancel" class="admin_link">Cancel</div>'
-	);
-	$('#editthis').addClass('yellow_bg');
-	$('#cancel').removeClass('yellow_bg').addClass('red_bg');
-	$('#deletethis').hide();
-	$('#deletethis').off('click');
-	$('#newpage').hide();
-	$('#newpage').off('click');
-	$('#bannersettings').hide();
-	$('#bannersettings').off('click');
-	$('#signout').hide();
-	$('#signout').off('click');
-
-	// Do not allow headers on these pages to change color
-	var locked_header_color = ['/lessons','/store','/rentals','/events','/testimonials']
-	if ($.inArray(window.location.pathname, locked_header_color) === -1) {
-		$("img.bg-header-sub").on('click', function() {
-			if ($("img.bg-header-sub").attr('src') === '/static/image/header-green.png') {
-				$("img.bg-header-sub").attr('src','/static/image/header-blue.png');
-			} 
-			else if ($("img.bg-header-sub").attr('src') === '/static/image/header-blue.png') {
-				$("img.bg-header-sub").attr('src','/static/image/header-yellow.png');
-			}
-			else if ($("img.bg-header-sub").attr('src') === '/static/image/header-yellow.png') {
-				$("img.bg-header-sub").attr('src','/static/image/header-red.png');
-			}
-			else if ($("img.bg-header-sub").attr('src') === '/static/image/header-red.png') {
-				$("img.bg-header-sub").attr('src','/static/image/header-purple.png');
-			}
-			else {
-				$("img.bg-header-sub").attr('src','/static/image/header-green.png');
-			}
-		});
-	}
-
-	$('#save').on('click', function() {
-		savePage();
-	});
-
-	$('#cancel').on('click', function() {
-		if(window.location.pathname === '/modify/new') {
-			window.location.replace('/');
-		}
-		else {
-			window.location.replace(window.location.pathname);
-		}
-	});
-
-	// Turn off automatic editor creation first.
-	CKEDITOR.disableAutoInline = true;
-
-	try {
-		CKEDITOR.inline( 'content_sub' );
-		//CKEDITOR.inline( 'content_sub' ); // + line for each div that should spawn a ck instance
-	}
-	catch(e) {
-		console.log('Error attaching in-line editor: ' + e);
-	}
-}
-
-$(document).ready(function(){
-
-	// define pages that should have delete disabled
-	var protectedPages = ["/lessons","/store","/rentals","/repairs","/events","/about","/contact","/testimonials"];
-
-	if (!String.format) {
-		// stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format
-		String.format = function(format) {
-			var args = Array.prototype.slice.call(arguments, 1);
-			return format.replace(/{(\d+)}/g, function(match, number) { 
-				return typeof args[number] != 'undefined'
-					? args[number] 
-					: match
-				;
-			});
-		};
-	}
-
-	$('head').append('<link rel="stylesheet" type="text/css" href="/static/style/admin_bar.css">');
-	$('head').append('<script type="text/javascript" src="/static/script/ckeditor/ckeditor.js"></script>');
-
-
-
-	$('#newpage').on('click', function() {
-		window.location.replace('/modify/new');
-	});
-	$('#signout').on('click', function() {
-		window.location.replace('/modify/logout');
-	});
-	$('#bannersettings').on('click', function() {
-		window.open('/modify/banner', 'banner', 'left=20,top=20,width=960,height=400,toolbar=0,menubar=0,resizable=0');
-	});
-	$('#upload').on('click', function() {
-		window.open('/modify/upload', 'upload', 'left=20,top=20,width=500,height=500,toolbar=0,menubar=0,resizable=0');
-	});
-	$('.info').on('click', function() {
-		window.open('/modify/info', 'info', 'left=20,top=20,width=500,height=500,toolbar=0,menubar=0,resizable=0');
-	})
-	$('.gcs_dir').on('click', function() {
-		window.open('/dres/directory', 'directory', 'left=20,top=20,width=500,height=500,menubar=0,resizable=1');
-	})
-
-	if (editable_existing){
-		if ($.inArray(window.location.pathname, protectedPages) === -1) {
-			$('#deletethis').click(function() {
-				if (confirm('Really delete ' + window.location.pathname + ' forever?')) {
-					$.post('/modify/delete', {
-						'resource' : window.location.pathname,
-					})
-					.done(function() {
-						window.location.replace('/');
-					})
-					.fail(function() {
-						alert('Sorry, the delete request didn\'t go through. Check your internet connection, refresh and try again. If this condition persists, please file a bug.');
-					});
-				}
-
-			});
-		}
-		else {
-			$('#deletethis').hide();
-		}
-		$('#editthis').on('click', function() {
-			$('#editthis').off('click');
-			enterEditingMode(newPath = decodeURIComponent(window.location.pathname.replace('/','')));
-		});
-	}
-	else if (new_editor) {
-		enterEditingMode(newPath = ' ');
-	}
-	else {
-		$('#editthis').hide();
-		$('#deletethis').hide();
-	}
 
 });
-*/

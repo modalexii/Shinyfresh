@@ -99,12 +99,17 @@ class Server(webapp2.RequestHandler):
 		self.response.write(public_content)
 
 		if users.is_current_user_admin():
-			current_user = users.get_current_user()
-			nickname = current_user.email()
-			nickname = nickname.split('@')[0] # user, no domain
-			# append the admin bar
+			#current_user = users.get_current_user()
+			#nickname = current_user.email()
+			#nickname = nickname.split('@')[0] # user, no domain
+			# set the admin bar mode
+			if db_entry.template == 'gallery':
+				mode = 'gallery'
+			else:
+				mode = 'standard'
 			admin_bar = app_file.get('templates/admin_bar.html')
-			admin_bar = admin_bar.format(nickname = nickname)
+			# append the admin bar
+			admin_bar = admin_bar.format(mode = mode)
 			self.response.write(admin_bar)
 
 	def post(self):

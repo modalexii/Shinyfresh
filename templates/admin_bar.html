@@ -1,22 +1,23 @@
-<div id="adminbar" class="adminutility">
-		<div id="admincontent">
-		<div id="currentpageoperations">
-			<span id="currentpagelabel">Current Page: </span>
-			<button id="cancelthis" class="admin_link">
+<div id="adminbar" class="adminutility" data-mode="{mode}">
+	<div id="admincontent">
+		<span id="current_page_operations">
+			<span id="current_page_label" class="current_page">Current Page </span>
+			<button id="cancelthis" class="admin_link current_page">
 				Cancel
 			</button>
-			<button id="editthis" class="admin_link">
+			<button id="editthis" class="admin_link current_page">
 				Edit
 			</button>
-			<button id="savethis" class="admin_link">
+			<button id="savethis" class="admin_link current_page">
 				Save
 			</button>
-			<button id="deletethis" class="admin_link">
+			<button id="deletethis" class="admin_link current_page">
 				Delete
 			</button>
-		</div> <!-- /currentpageoperations -->
+		</span>
+		<div class="button_seperator">&bull;</div>
 		<button id="newpage" class="admin_link">
-			New Page 
+			New 
 		</button>
 		<select id="templateselect">
 			<option value="" disabled selected hidden>Choose template</option>
@@ -27,37 +28,73 @@
 		</select>
 		<input id="newpath" type="text" placeholder="/example/mynewpage"></input>
 		<input id="pagetitle" type="text" value="Shinyfresh"></input>
-		<button id="managefiles" class="admin_link">
-			Manage Files
+		<button id="newtile" class="admin_link">
+			+Tile
 		</button>
-		<button id="logout" class="adminlink">
-			Log Out {nickname}
+		<button id="managefiles" class="admin_link">
+			Files*
+		</button>
+		<div class="button_seperator">&bull;</div>
+		<button id="logout" class="admin_link">
+			Logout
 		</button>
 	</div> <!-- /admin_content -->
-	<div id="filemanager">
-		<!--
-		<form id="test" action="/files/upload" method="post" enctype="multipart/form-data">
-			<input type="file" name="file"></input>
-			<input type="submit"></input>
-			<input type="hidden" value="upload" name="_intent"></input>
-		</form>
-		-->
-		<script src="/static/script/dropzone.js"></script>
-		<script src="/static/script/dropzone-config.js"></script>
-		
-
-		<div id="dropzone_container">
-			<form id="admin_bar_dropzone" action="/files/upload" class="dropzone">
-				<input type="hidden" value="upload" name="_intent"></input>
-			</form>
-		</div>
-
-		<div id="filemanager_index" class="filemanager_index">
-			<!-- populated with thumbnails -->
-		</div>
-		
-	</div> <!--/filemanager -->
-	<script src="/static/script/slick/slick.min.js"></script>
+	<div id="imageinfo" class="overlay">
+        <div class="popup">
+            <div class="image_info gallery" id="image_info_thumb">
+            <a class="image_info gallery" id="thumb_to_full" href="" target="_blank" name="Open full size">
+                <img class="image_info thumb"></img>
+            </a>
+            </div>
+            <div class="content">
+            	<div class="gallery row">
+            		<button class="image_info safe">Save &amp; Close</button>
+            		<button class="image_info warn">Discard Changes</button>
+            		<button class="image_info danger">Remove Tile</button>
+            	</div>
+                <div class="gallery row">
+                    <div class="image_info field_label">
+                        URL 
+                    </div>
+                    <div class="image_info text_field">
+                        <input type="text" class="image_info gallery" id="tile_url"></input>
+                    </div>
+                </div>
+                <div class="gallery row">
+                    <div class="image_info field_label">
+                        Title 
+                    </div>
+                    <div class="image_info text_field">
+                        <input type="text" class="image_info gallery" id="tile_title"></input>
+                    </div>
+                </div>
+                <div class="gallery row">
+                    <div class="image_info field_label">
+                        Description
+                    </div>
+                    <div class="image_info text_field">
+                        <textarea class="image_info gallery" id="tile_description"></textarea>
+                    </div>
+                </div>
+                <div class="gallery row">
+                    <div class="image_info field_label">
+                        Media
+                    </div>
+                    <div class="image_info text_field">
+                        <input type="text" class="image_info gallery" id="tile_media"></input>
+                    </div>
+                </div>
+                <div class="gallery row">
+                    <div class="image_info field_label">
+                        Date 
+                    </div>
+                    <div class="image_info text_field">
+                        <input type="text" class="image_info gallery" id="tile_date"></input>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 	<script src="/static/script/ckeditor/ckeditor.js"></script>
 	<script src="/static/script/admin.js"></script>
 </div> 

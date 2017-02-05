@@ -40,7 +40,7 @@ def admin_file_index(gcs_bucket):
     import app_file
 
     gcs_bucket = '/{}'.format(gcs_bucket)
-    html = ''
+    thumbs = text_links = ''
 
     for stat in gcs.listbucket(gcs_bucket, delimiter = '/'):
         # does not currently account for pseudo-subdirectories (stat.is_dir)
@@ -51,11 +51,11 @@ def admin_file_index(gcs_bucket):
         mime = gcs.stat(gcs_abs_path).content_type
 
         if mime.split('/')[0] == "image":
-            # get a public url for the a thumbnail
+            # get a public url for the thumbnail
             src_thumb = images.get_serving_url(
                 None, 
                 filename = gcs_handoff_uri,
-                size = 100,
+                size = 400,
                 crop = True
             )
             # get a public url for the full image
@@ -65,22 +65,35 @@ def admin_file_index(gcs_bucket):
             )
             template = app_file.get('templates/file_browser_thumb.html')
             index_entry = template.format(
-                src_full = src_full,
-                src_thumb = src_thumb,
+                raw_url = src_full,
+                thumb_url = src_thumb,
                 filename = filename
             )
+            # append to running blob
+            thumbs = '{thumbs}{index_entry}'.format(
+                thumbs = thumbs, 
+                index_entry = index_entry
+            )
+
         else:
             http_path = gcs_to_http_path(gcs_abs_path, gcs_bucket)
             template = app_file.get('templates/file_browser_nothumb.html')
             index_entry = template.format(
-                href = http_path,
+                url = http_path,
                 filename = filename
             )
+            # append to running blob
+            text_links = '{text_links}{index_entry}'.format(
+                text_links = text_links, 
+                index_entry = index_entry
+            )
 
-        html = '{html}{index_entry}'.format(
-            html = html, 
-            index_entry = index_entry
-        )
+    # drop index in to the file manager gallery template
+    template = app_file.get('templates/gallery_filemanager.html')
+    html = template.format(
+        thumbs = thumbs,
+        text_links = text_links
+    )
 
     return html
         
